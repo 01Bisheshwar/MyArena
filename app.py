@@ -7,7 +7,7 @@ app = Flask(__name__)
 CORS(app)
 
 # Use environment variable for the MongoDB connection string
-mongodb_uri = os.getenv('MONGODB_URI', 'mongodb+srv://<Bisheshwar>:<x50CF7ViAg30kIPn>@myarena.jqbhqce.mongodb.net/?retryWrites=true&w=majority&appName=MyArena')
+mongodb_uri = os.getenv('MONGODB_URI', 'mongodb+srv://Bisheshwar:x50CF7ViAg30kIPn@myarena.jqbhqce.mongodb.net/?retryWrites=true&w=majority&appName=MyArena')
 
 # Initialize MongoDB client
 client = MongoClient(mongodb_uri)
