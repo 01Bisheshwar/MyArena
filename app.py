@@ -1,18 +1,26 @@
 from flask import Flask, request, jsonify
-from flask_pymongo import PyMongo
+from flask_cors import CORS
+from pymongo import MongoClient
+import os
 
 app = Flask(__name__)
+CORS(app)
 
-# MongoDB configuration
-app.config["MONGO_URI"] = "mongodb://localhost:27017/MyArena"  # Use the correct database name
-mongo = PyMongo(app)
+# Use environment variable for the MongoDB connection string
+mongodb_uri = os.getenv('MONGODB_URI', 'mongodb+srv://<Bisheshwar>:<x50CF7ViAg30kIPn>@myarena.jqbhqce.mongodb.net/?retryWrites=true&w=majority&appName=MyArena')
+
+# Initialize MongoDB client
+client = MongoClient(mongodb_uri)
+
+# Specify the database you are using
+db = client['MyArena']  # Replace 'your_database_name' with the actual name of your database
 
 @app.route('/check_user', methods=['POST'])
 def check_user():
     data = request.get_json()
     username = data.get('username')
     if username:
-        user = mongo.db.leaderboard.find_one({"username": username})
+        user = db.leaderboard.find_one({"username": username})
         if user:
             return jsonify({"exists": True}), 200
         else:
@@ -24,14 +32,14 @@ def insert_user():
     data = request.get_json()
     username = data.get('username')
     password = data.get('password')
-    highscore = data.get('highscore')
+    highscore = data.get('highscore', 0)  # Default highscore to 0 if not provided
     if username and password:
         # Check if the username already exists
-        if mongo.db.leaderboard.find_one({"username": username}):
+        if db.leaderboard.find_one({"username": username}):
             return jsonify({"error": "Username already exists"}), 400
         else:
             # Insert the username and password into the MongoDB database
-            mongo.db.leaderboard.insert_one({"username": username, "password": password, "highscore":highscore})
+            db.leaderboard.insert_one({"username": username, "password": password, "highscore": highscore})
             return jsonify({"success": True}), 201
     return jsonify({"error": "Missing username or password"}), 400
 
@@ -41,7 +49,7 @@ def check_credentials():
     username = data.get('username')
     password = data.get('password')
     if username and password:
-        user = mongo.db.leaderboard.find_one({"username": username, "password": password})
+        user = db.leaderboard.find_one({"username": username, "password": password})
         if user:
             return jsonify({"valid": True}), 200
         else:
@@ -53,7 +61,7 @@ def check_highscore():
     data = request.get_json()
     username = data.get('username')
     if username:
-        user = mongo.db.leaderboard.find_one({"username": username})
+        user = db.leaderboard.find_one({"username": username})
         if user:
             highscore = user.get('highscore', 0)
             return jsonify({"highscore": highscore}), 200
@@ -67,11 +75,11 @@ def update_highscore():
     username = data.get('username')
     new_score = data.get('score')
     if username and new_score is not None:
-        user = mongo.db.leaderboard.find_one({"username": username})
+        user = db.leaderboard.find_one({"username": username})
         if user:
             current_highscore = user.get('highscore', 0)
             if new_score > current_highscore:
-                mongo.db.leaderboard.update_one({"username": username}, {"$set": {"highscore": new_score}})
+                db.leaderboard.update_one({"username": username}, {"$set": {"highscore": new_score}})
                 return jsonify({"updated": True}), 200
             else:
                 return jsonify({"updated": False, "message": "New score is not higher than current highscore"}), 200
@@ -82,7 +90,7 @@ def update_highscore():
 @app.route('/leaderboard', methods=['GET'])
 def leaderboard():
     # Retrieve all users and their highscores
-    users = list(mongo.db.leaderboard.find({}, {"_id": 0, "username": 1, "highscore": 1}))
+    users = list(db.leaderboard.find({}, {"_id": 0, "username": 1, "highscore": 1}))
     
     # Sort users by highscore in descending order
     sorted_users = sorted(users, key=lambda x: x['highscore'], reverse=True)
