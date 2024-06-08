@@ -10,6 +10,10 @@ client = pymongo.MongoClient(connection_url)
 # Specify the database you are using
 db = client.get_database('MyArena')  # Replace 'your_database_name' with the actual name of your database
 
+@app.route('/check_ready', methods=['GET'])
+def check_ready():
+    return jsonify({"status": "ready"})
+
 @app.route('/check_user', methods=['POST'])
 def check_user():
     data = request.get_json()
