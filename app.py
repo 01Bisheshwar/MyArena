@@ -4,7 +4,8 @@ import pymongo
   
 # Replace your URL here. Don't forget to replace the password. 
 connection_url = 'mongodb+srv://Players:9f0ZRG7msSjmeLOb@bisheshwargames.ur3vhyp.mongodb.net/?retryWrites=true&w=majority&appName=BisheshwarGames'
-app = Flask(__name__) 
+app = Flask(__name__)
+CORS(app)
 client = pymongo.MongoClient(connection_url) 
 
 # Specify the database you are using
