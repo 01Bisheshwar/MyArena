@@ -1,27 +1,14 @@
-from flask import Flask, request, jsonify
-from flask_cors import CORS
-from pymongo.mongo_client import MongoClient
-from pymongo.server_api import ServerApi
-import os
-
-app = Flask(__name__)
-CORS(app)
-
-# Use environment variable for the MongoDB connection string
-mongodb_uri = os.getenv('MONGODB_URI', 'mongodb+srv://Players:9f0ZRG7msSjmeLOb@bisheshwargames.ur3vhyp.mongodb.net/?retryWrites=true&w=majority&appName=BisheshwarGames')
-
-# Initialize MongoDB client with server API version
-client = MongoClient(mongodb_uri, server_api=ServerApi('1'))
-
-# Verify the connection with a ping
-try:
-    client.admin.command('ping')
-    print("Pinged your deployment. You successfully connected to MongoDB!")
-except Exception as e:
-    print(f"Error connecting to MongoDB: {e}")
+from flask import Flask 
+from flask_cors import CORS 
+import pymongo 
+  
+# Replace your URL here. Don't forget to replace the password. 
+connection_url = 'mongodb+srv://Players:9f0ZRG7msSjmeLOb@bisheshwargames.ur3vhyp.mongodb.net/?retryWrites=true&w=majority&appName=BisheshwarGames'
+app = Flask(__name__) 
+client = pymongo.MongoClient(connection_url) 
 
 # Specify the database you are using
-db = client['MyArena']  # Replace 'your_database_name' with the actual name of your database
+db = client.get_database('MyArena')  # Replace 'your_database_name' with the actual name of your database
 
 @app.route('/check_user', methods=['POST'])
 def check_user():
