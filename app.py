@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from pymongo import MongoClient
+from pymongo.mongo_client import MongoClient
+from pymongo.server_api import ServerApi
 import os
 
 app = Flask(__name__)
@@ -9,8 +10,15 @@ CORS(app)
 # Use environment variable for the MongoDB connection string
 mongodb_uri = os.getenv('MONGODB_URI', 'mongodb+srv://Players:9f0ZRG7msSjmeLOb@bisheshwargames.ur3vhyp.mongodb.net/?retryWrites=true&w=majority&appName=BisheshwarGames')
 
-# Initialize MongoDB client
-client = MongoClient(mongodb_uri)
+# Initialize MongoDB client with server API version
+client = MongoClient(mongodb_uri, server_api=ServerApi('1'))
+
+# Verify the connection with a ping
+try:
+    client.admin.command('ping')
+    print("Pinged your deployment. You successfully connected to MongoDB!")
+except Exception as e:
+    print(f"Error connecting to MongoDB: {e}")
 
 # Specify the database you are using
 db = client['MyArena']  # Replace 'your_database_name' with the actual name of your database
